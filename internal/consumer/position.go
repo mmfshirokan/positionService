@@ -42,6 +42,18 @@ func (p *position) ConsumePrice(ctx context.Context) {
 							Operation: pos.OperationID.String(),
 						}
 
+						if pos.OpenPrice.IsZero() {
+							log.Infof("Closing price chanel, therfore exiting goroutine with symb: %v, userID: %v", key.Symbol, key.Operation)
+
+							ch, err := p.mapServ.Get(key)
+							if err != nil {
+								log.Error("Error geting chanel for it's clouser")
+								continue
+							}
+
+							close(ch)
+						}
+
 						priceChan := make(chan model.Price)
 						err := p.mapServ.Add(key, priceChan)
 						if err != nil {
